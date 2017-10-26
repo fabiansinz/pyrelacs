@@ -456,10 +456,21 @@ class StimuliFile(RelacsFile):
     def __init__(self, filename):
         super(StimuliFile, self).__init__(filename)
 
+    def drop_repro_startline(self, data, key):
+        # exclude lines if the have if signal
+        tmp = [[d[i] for i,k in enumerate(key) if k[0] == 'stimulus' and not 'timing' in k[1]] for d in data]
+        exclude = [np.all([e == '-' for e in f]) for f in tmp]
+        if np.any(exclude):
+            warnings.warn("""Dropping {} lines from data block because there is no signal. 
+                    Probably repro beginning""".format(np.sum(exclude)))
+        return [d for d, e in zip(data, exclude) if not e]
+
     def _load(self, item_index, replace=True):
         meta, key, data = super(StimuliFile, self)._load(item_index, replace=False, loadkey=False)
         key = parse_stimuli_key(key, self.filename)
         data = [[str2number(elem.strip()) for elem in line.split('  ') if elem.strip()] for line in data]
+        data = self.drop_repro_startline(data, key)
+
         if replace:
             self.content[item_index] = (meta, key, data)
         return meta, key, data
