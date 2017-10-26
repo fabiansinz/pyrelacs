@@ -458,7 +458,11 @@ class StimuliFile(RelacsFile):
 
     def drop_repro_startline(self, data, key):
         # exclude lines if the have if signal
+        if data == [[0]]:
+            warnings.warn('Data is [[0]]. Returning unchanged')
+            return data
         tmp = [[d[i] for i,k in enumerate(key) if k[0] == 'stimulus' and not 'timing' in k[1]] for d in data]
+
         exclude = [np.all([e == '-' for e in f]) for f in tmp]
         if np.any(exclude):
             warnings.warn("""Dropping {} lines from data block because there is no signal. 
