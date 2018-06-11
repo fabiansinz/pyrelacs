@@ -1,6 +1,8 @@
 import linecache
 import re
 import types
+from io import TextIOBase
+
 import yaml
 from IPython import embed
 
@@ -59,6 +61,9 @@ def parse_meta(block, filename):
 
 
 def fix_meta_block(meta):
+    for i, m in enumerate(meta):
+        if '"pi' in m:
+            meta[i] = m.replace('"pi', '"')
     indent_stack = [(len(meta[0]) - len(meta[0].lstrip())) * ' ']
     indent = indent_stack[0]
     for i, m in enumerate(meta):
