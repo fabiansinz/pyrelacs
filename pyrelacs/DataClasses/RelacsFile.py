@@ -15,6 +15,8 @@ FileRange = namedtuple('FileRange', ['start', 'end', 'type'])
 MetaDataBlock = namedtuple('MetaDataBlock', ['meta', 'data'])
 DataBlock = namedtuple('DataBlock', ['key', 'meta', 'data'])
 
+class EmptyException(Exception):
+    pass
 
 def str2number(s):
     """
@@ -328,9 +330,11 @@ class RelacsFile(object):
             return None
 
         for i, j in enumerate(idx):
+            if (type(datas[i]) == list and len(datas[i]) == 0):
+                raise EmptyException('Data contains no elements')
             if isinstance(datas[i], FileRange) or \
                     (type(datas[i]) == list and isinstance(datas[i][0], FileRange)):
-                _, keys[i], datas[i] = self._load(j)
+                    _, keys[i], datas[i] = self._load(j)
 
         return metas, keys, datas
 
